@@ -1,0 +1,6 @@
+# Processing build artifacts
+out/
+build/
+
+# VS Code
+.vscode/
