@@ -1,29 +1,31 @@
 // Vicsek model - standard implementation (Processing, Java mode)
-// Tryck:
-//   SPACE - pausa/fortsätt
-//   r     - nollställ (ny slumpmässig start)
-//   + / - - öka/minska brus (eta)
-//   ] / [ - öka/minska antal partiklar (N)
-// Skapad för att vara enkel att experimentera med.
+// Press:
+//   SPACE - pause/resume
+//   r     - reset (new random start)
+//   + / - - increase/decrease noise (eta)
+//   ] / [ - increase/decrease number of particles (N)
+// Created to be easy to experiment with.
 
-int N = 300;            // antal agenter
-float v0 = 2.0;         // hastighet (pix/frame)
-float interactionR = 10; // interaktionsradie
-float eta = 0.3;        // brusstyrka (max vinkelavvikelse i radianer)
+GraphWindow graph; // separate window for graphing polarization
+
+int N = 300;            // number of agents
+float v0 = 2.0;         // speed (pixels/frame)
+float interactionR = 10; // interaction radius
+float eta = 0.3;        // noise strength (max angular deviation in radians)
 boolean paused = false;
 
-Agent[] agents;
+Agent[] agents; // array of agents
 
-// för visualisering
-int trailLen = 0; // >0 ger spår (rymdminne), 0 = inga spår
+// for visualization
+int trailLen = 0; // >0 gives trails (spatial memory), 0 = no trails
 
-// Mätning
+// Measurement
 float globalOrder = 0;
 
 void setup() {
   size(900, 700);
   resetSim();
-  smooth();
+  smooth(); // antialiasing
 }
 
 void resetSim() {
@@ -46,17 +48,17 @@ void draw() {
   }
 
   if (!paused) {
-    // Uppdateringssteg enligt Vicsek:
-    // 1) för varje agent beräkna medelriktning inom radius
-    // 2) lägga på brus
-    // 3) flytta enligt v0 och ny riktning
+    // Update steps according to Vicsek:
+    // 1) for each agent calculate average direction within radius
+    // 2) add noise
+    // 3) move according to v0 and new direction
     float[] newTheta = new float[N];
     for (int i = 0; i < N; i++) {
-      // beräkna vektorsumman av riktningar inom interactionR
+      // calculate vector sum of directions within interactionR
       PVector sum = new PVector(0, 0);
       for (int j = 0; j < N; j++) {
         if (i == j) {
-          // inkludera även sig själv i medel (vanligt i Vicsek)
+          // include self in average (common in Vicsek)
           sum.add(PVector.fromAngle(agents[j].theta));
         } else {
           float dx = wrapDistX(agents[j].pos.x - agents[i].pos.x);
@@ -68,39 +70,39 @@ void draw() {
         }
       }
       float avgTheta = atan2(sum.y, sum.x);
-      // brus: uniformt i [-eta/2, eta/2]
+      // noise: uniform in [-eta/2, eta/2]
       float noiseAngle = random(-eta/2.0, eta/2.0);
       newTheta[i] = avgTheta + noiseAngle;
     }
 
-    // 4) applicera nya vinklar och uppdatera positioner
+    // 4) apply new angles and update positions
     for (int i = 0; i < N; i++) {
       agents[i].theta = newTheta[i];
       agents[i].update();
     }
   }
 
-  // Räkna global ordning (polarisation)
+  // Calculate global order (polarization)
   PVector vsum = new PVector(0,0);
   for (int i = 0; i < N; i++) {
     vsum.add(PVector.fromAngle(agents[i].theta));
   }
   globalOrder = vsum.mag() / (float)N;
 
-  // Rita agenter
+  // Draw agents
   for (int i = 0; i < N; i++) agents[i].display();
 
-  // UI-tekst
+  // UI text
   fill(255);
   noStroke();
   textAlign(LEFT, TOP);
   text("Vicsek model — N = " + N + "   v0 = " + nf(v0,1,2) + "   R = " + nf(interactionR,1,1), 8, 8);
-  text("eta = " + nf(eta,1,3) + "   Polarisation = " + nf(globalOrder,1,3), 8, 26);
-  text("SPACE: pausa  |  r: reset  |  + / - : ändra brus  |  ] / [: ändra N", 8, 44);
+  text("eta = " + nf(eta,1,3) + "   Polarization = " + nf(globalOrder,1,3), 8, 26);
+  text("SPACE: pause  |  r: reset  |  + / - : change noise  |  ] / [: change N", 8, 44);
 }
 
-// Hjälpresurser för periodiska randvillkor (wrap-around)
-// wrapDistX/ Y returnerar minimal skillnad i x/y med torusavstånd
+// Helper functions for periodic boundary conditions (wrap-around)
+// wrapDistX/ Y return minimal difference in x/y with torus distance
 float wrapDistX(float dx) {
   if (dx > width/2.0) dx -= width;
   if (dx < -width/2.0) dx += width;
@@ -119,9 +121,9 @@ void keyPressed() {
   } else if (key == 'r' || key == 'R') {
     resetSim();
   } else if (key == '+') {
-    eta = max(0, eta - 0.02); // minska brus (mer ordning)
+    eta = max(0, eta - 0.02); // decrease noise (more order)
   } else if (key == '-') {
-    eta += 0.02; // öka brus
+    eta += 0.02; // increase noise
   } else if (key == ']') {
     N = min(2000, N + 20);
     resetSim();

@@ -2,13 +2,14 @@ class Agent {
   PVector pos;
   float theta;
 
+  // Constructor      
   Agent(float x, float y, float t) {
     pos = new PVector(x, y);
     theta = t;
   }
 
   void update() {
-    // Flytta med konstant hastighet v0 i riktning theta, med wrap-around
+    // Move agent forward with speed v0 in direction theta
     pos.x += v0 * cos(theta);
     pos.y += v0 * sin(theta);
 
@@ -24,8 +25,8 @@ class Agent {
     translate(pos.x, pos.y);
     rotate(theta);
     noStroke();
-    fill(200, 120, 40);
-    // rita en liten triangel som pekar åt theta
+    fill(200, 120, 40); // orange color
+    // draw a small triangle pointing in direction theta
     float s = 6;
     triangle(-s, -s*0.6, -s, s*0.6, s*1.5, 0);
     popMatrix();
