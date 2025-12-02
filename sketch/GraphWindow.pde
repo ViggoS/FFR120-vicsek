@@ -1,3 +1,4 @@
+
 class GraphWindow extends PApplet {
 
   ArrayList<Float> values = new ArrayList<Float>();
@@ -8,7 +9,7 @@ class GraphWindow extends PApplet {
   }
 
   public void setup() {
-    surface.setTitle("Polarisation");
+    surface.setTitle("Alignment over Time");
   }
 
   public void draw() {
